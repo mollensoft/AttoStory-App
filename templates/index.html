@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atto-Story</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --background-color: #f8fafc;
+            --text-color: #1e293b;
+            --card-background: #ffffff;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            background-color: var(--card-background);
+            padding: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin: 0;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-top: 0.5rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            align-items: center;
+            margin: 2rem 0;
+        }
+
+        .category-filters {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .category-chip {
+            background-color: var(--card-background);
+            border: 1px solid #e2e8f0;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .category-chip.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .output-controls {
+            display: flex;
+            gap: 1rem;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            background-color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        button i {
+            font-size: 1.2rem;
+        }
+
+        .status {
+            background-color: var(--card-background);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .status.loading {
+            display: block;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .news-card {
+            background-color: var(--card-background);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .news-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .news-card h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .article-meta {
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .article-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .article-source {
+            color: #64748b;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .article-source i {
+            font-size: 0.9rem;
+        }
+
+        .news-section {
+            margin-bottom: 1.25rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .news-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .section-label {
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .section-content {
+            margin-left: 0.5rem;
+            line-height: 1.6;
+        }
+
+        .sentiment-indicator {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        .sentiment-positive {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .sentiment-negative {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .sentiment-neutral {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+
+        .news-footer {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.read-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.read-more:hover {
+    color: var(--secondary-color);
+    text-decoration: underline;
+}
+
+.footer {
+            margin-top: 4rem;
+            padding: 2rem 0;
+            background-color: var(--card-background);
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .version-info {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 0.5rem;
+        }
+
+        .version-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .version-item i {
+            color: var(--primary-color);
+        }
+
+        .copyright {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+
+        .copyright i {
+            font-size: 0.75rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .output-controls {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Atto-Story: The Ai News Analyzer App</h1>
+            <p class="subtitle">Get Ai powered insights from the top Two (2) latest news stories per catagory</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="controls">
+            <div class="category-filters">
+                <div class="category-chip active" data-category="technology">
+                    <i class="fas fa-microchip"></i> Technology
+                </div>
+                <div class="category-chip" data-category="cybersecurity">
+                    <i class="fas fa-shield-alt"></i> Cybersecurity
+                </div>
+                <div class="category-chip" data-category="ai">
+                    <i class="fas fa-robot"></i> AI & ML
+                </div>
+                <div class="category-chip" data-category="business">
+                    <i class="fas fa-chart-line"></i> Business
+                </div>
+            </div>
+
+            <div class="output-controls">
+                <button onclick="fetchNews('text')" id="textBtn">
+                    <i class="fas fa-file-alt"></i> Generate Text Summary
+                </button>
+                <button onclick="fetchNews('audio')" id="audioBtn">
+                    <i class="fas fa-headphones"></i> Listen to Summary
+                </button>
+            </div>
+        </div>
+
+        <div id="status" class="status">
+            <div class="loading-spinner"></div>
+            <span>Processing your request...</span>
+        </div>
+
+        <div id="results" class="news-grid"></div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="version-info">
+                <div class="version-item">
+                    <i class="fas fa-code-branch"></i>
+                    <span>Version 1.0.0</span>
+                </div>
+                <div class="version-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Build Date: February 16, 2025</span>
+                </div>
+            </div>
+            <div class="copyright">
+                <i class="fas fa-copyright"></i>
+                <span>2025 MAMollenkopf - All rights reserved.</span>
+            </div>
+        </div>
+    </footer>
+
+
+    <script>
+        // Handle category selection
+        const categoryChips = document.querySelectorAll('.category-chip');
+        categoryChips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                // Remove active class from all chips
+                categoryChips.forEach(c => c.classList.remove('active'));
+                // Add active class to clicked chip
+                chip.classList.add('active');
+            });
+        });
+
+        function getSelectedCategories() {
+            return Array.from(document.querySelectorAll('.category-chip.active'))
+                .map(chip => chip.dataset.category);
+        }
+
+        function fetchNews(outputType) {
+            const statusEl = document.getElementById('status');
+            const buttons = document.querySelectorAll('button');
+            const selectedCategories = getSelectedCategories();
+
+            if (selectedCategories.length === 0) {
+                alert('Please select at least one category');
+                return;
+            }
+
+            // Disable buttons and show loading state
+            buttons.forEach(btn => btn.disabled = true);
+            statusEl.classList.add('loading');
+            
+            fetch("/generate", {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    output_type: outputType,
+                    categories: selectedCategories
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (outputType === "audio") {
+                    statusEl.innerHTML = '<i class="fas fa-volume-up"></i> Playing audio summary...';
+                    let audio = new Audio(data.audio_url);
+                    audio.play();
+                    audio.onended = () => {
+                        statusEl.classList.remove('loading');
+                        buttons.forEach(btn => btn.disabled = false);
+                    };
+                } else {
+                    displayResults(data.summaries);
+                    statusEl.classList.remove('loading');
+                    buttons.forEach(btn => btn.disabled = false);
+                }
+            })
+            .catch(error => {
+                statusEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Error fetching news.';
+                statusEl.classList.remove('loading');
+                buttons.forEach(btn => btn.disabled = false);
+                console.error('Error:', error);
+            });
+        }
+
+        function displayResults(summaries) {
+    const resultsContainer = document.getElementById('results');
+    resultsContainer.innerHTML = '';
+
+    summaries.forEach(summary => {
+        const card = document.createElement('div');
+        card.className = 'news-card';
+        
+        // Detect sentiment from summary text
+        let sentiment = 'neutral';
+        if (summary.summary.toLowerCase().includes('positive')) {
+            sentiment = 'positive';
+        } else if (summary.summary.toLowerCase().includes('negative')) {
+            sentiment = 'negative';
+        }
+
+        // Add article metadata at the top
+        const articleMeta = `
+            <div class="article-meta">
+                <div class="article-title">${summary.title}</div>
+                <div class="article-source">
+                    <i class="fas fa-newspaper"></i>
+                    ${summary.source}
+                </div>
+            </div>
+        `;
+
+        // Split the summary into sections based on common patterns
+        const summaryText = summary.summary;
+        const sections = summaryText.split(/(?=Summary:|Credibility:|Sentiment:)/).filter(Boolean);
+        
+        let formattedSections = sections.map(section => {
+            const match = section.match(/^(Summary:|Credibility:|Sentiment:)?(.*)/s);
+            const label = match[1] ? match[1].trim().replace(':', '') : 'Analysis';
+            const content = match[2].trim();
+            
+            return `
+                <div class="news-section">
+                    <span class="section-label">${label}</span>
+                    <div class="section-content">${content}</div>
+                </div>
+            `;
+        }).join('');
+
+        card.innerHTML = `
+            <h3>${summary.category}</h3>
+            ${articleMeta}
+            <div class="sentiment-indicator sentiment-${sentiment}">
+                ${sentiment.charAt(0).toUpperCase() + sentiment.slice(1)} Sentiment
+            </div>
+            ${formattedSections}
+            <div class="news-footer">
+                <a href="${summary.url}" target="_blank" class="read-more">
+                    <i class="fas fa-external-link-alt"></i> Read Original Article
+                </a>
+            </div>
+        `;
+        
+        resultsContainer.appendChild(card);
+    });
+}
+    </script>
+</body>
+</html>

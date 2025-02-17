@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATTO-STORY AI News Analysis and Summary</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; padding: 20px; }
+        .summary { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9; }
+        h2 { color: #333; }
+    </style>
+</head>
+<body>
+    <h1>ATTO-STORY AI News Analysis and Summary</h1>
+    {% for summary in summaries %}
+    <div class="summary">
+        <h2>{{ summary.category }}</h2>
+        <p>{{ summary.summary }}</p>
+    </div>
+    {% endfor %}
+    <a href="/">Go Back</a>
+</body>
+</html>
